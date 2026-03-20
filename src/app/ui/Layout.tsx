@@ -4,8 +4,10 @@ import "./App.css";
 export default function Layout() {
 
   return <>
-    <header>Header 
+    <header>
+        Frontend 
         <Link to='/'>Home</Link> 
+        <Link to='/deploy'>Deploy</Link>
         <Link to='/no-address'>Not Found</Link>
     </header>
     <main><Outlet /></main>
