@@ -8,6 +8,7 @@ export default function Layout() {
         Frontend 
         <Link to='/'>Home</Link> 
         <Link to='/deploy'>Deploy</Link>
+        <Link to='/auth'>Auth</Link>
         <Link to='/no-address'>Not Found</Link>
     </header>
     <main><Outlet /></main>
