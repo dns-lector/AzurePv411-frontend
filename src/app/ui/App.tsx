@@ -5,6 +5,7 @@ import Home from '../../pages/home/Home';
 import NotFound from '../../pages/not_found/NotFound';
 import Deploy from '../../pages/deploy/Deploy';
 import Auth from '../../pages/auth/Auth';
+import Reader from '../../pages/reader/Reader';
 
 export default function App() {
   return <BrowserRouter>
@@ -13,6 +14,7 @@ export default function App() {
         <Route index element={<Home />} />
         <Route path="auth"   element={<Auth />} />
         <Route path="deploy" element={<Deploy />} />
+        <Route path="reader" element={<Reader />} />
 
         <Route path="*" element={<NotFound />} />
       </Route>
