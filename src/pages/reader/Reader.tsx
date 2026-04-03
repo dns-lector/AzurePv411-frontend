@@ -8,10 +8,23 @@ interface ITranslation {
     to: string,
 };
 
+interface ILanguage {
+    name: string,
+    nativeName: string,
+    dir: string,
+}
+
+interface ILanguages {
+    [key: string]: ILanguage,
+}
+
 export default function Reader() {
     const [history, setHistory] = useState<Array<ITranslation>>([]);
+    const [languages, setLanguages] = useState<ILanguages|null>(null);
     const [isAuto, setAuto] = useState<boolean>(false);
     const autoRef = useRef<HTMLInputElement>(null);
+    const langFromRef = useRef<HTMLSelectElement>(null);
+    const langToRef = useRef<HTMLSelectElement>(null);
 
     useEffect(() => {
         //           [ history=[] isAuto=false autoRef ]
@@ -25,11 +38,13 @@ export default function Reader() {
                         window.location.href.includes("://127.0.0.");
 
                     const backUrl = isLocal ? "https://localhost:7012" : "https://pv411od0.azurewebsites.net";    
-        
-                    fetch(`${backUrl}/Home/ApiTranslate?text=${encodeURIComponent(selection)}`)
-                    .then(r => r.text())
-                    .then(t => {
-                        setHistory(prev => [...prev, {from: selection, to: t}]);
+                    const langFrom = langFromRef.current?.value ?? "en";
+                    const langTo = langToRef.current?.value ?? "uk";                    
+                    
+                    fetch(`${backUrl}/Home/ApiTranslate?lang-from=${langFrom}&lang-to=${langTo}&text-from=${encodeURIComponent(selection)}`)
+                    .then(r => r.json())
+                    .then(j => {
+                        setHistory(prev => [...prev, {from: selection, to: j.translation}]);
                     });                    
                 }
             }            
@@ -48,10 +63,40 @@ export default function Reader() {
         };
     }, []);
 
+    useEffect(() => {
+        if(isAuto && languages == null) {
+            fetch("https://api.cognitive.microsofttranslator.com/languages?api-version=3.0")
+            .then(r => r.json())
+            .then(j => {
+                setLanguages(j.translation);
+            });
+        }
+    }, [isAuto]);
+
+useEffect(() => {if(languages) console.log(languages)}, [languages]);
+
     return <>
     <label><input type='checkbox' ref={autoRef} onChange={e => setAuto(e.target.checked)} />Автоматично перекладати виділений текст</label>
+    {isAuto && <div>
+        {!languages ? "loading..." : <>
+            <span>Мова оригіналу: </span>
+            <select ref={langFromRef} defaultValue={"en"}>
+                {Object.keys(languages).map(lang => 
+                    <option key={lang} value={lang}>{languages[lang].name} 
+                        {languages[lang].name != languages[lang].nativeName && ` (${languages[lang].nativeName})`}
+                    </option>)}
+            </select>
+            <span>Мова перекладу: </span>
+            <select ref={langToRef} defaultValue={"uk"}>
+                {Object.keys(languages).map(lang => 
+                    <option key={lang} value={lang}>{languages[lang].name}
+                        {languages[lang].name != languages[lang].nativeName && ` (${languages[lang].nativeName})`}
+                    </option>)}
+            </select>
+        </>}
+    </div>}
     {history.length > 0 && <div>
-        {history.map(h => <p>{h.from} : {h.to}</p>)}    
+        {history.map(h => <p key={h.from}>{h.from} : {h.to}</p>)}    
     </div>}
     <h1>Internet</h1>
     <p>
